@@ -1,3 +1,4 @@
 *.pyc
 django
 repo-stats.pickle
+series.js
