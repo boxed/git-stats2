@@ -2,4 +2,8 @@
 django
 additions.js
 deletions.js
+commits.js
+cumulative_additions.js
+cumulative_deletions.js
+cumulative_commits.js
 *-stats.cache

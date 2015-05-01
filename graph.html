@@ -7,6 +7,7 @@
 <body>
     <script src="additions.js"></script>
     <script src="deletions.js"></script>
+    <script src="cumulative_commits.js"></script>
 
     <script>
         function add_graph(title, series) {
@@ -42,8 +43,9 @@
         }
 
         $(function(){
-            add_graph('Additions', additions);
+//            add_graph('Additions', additions);
 //            add_graph('Deletions', deletions);
+            add_graph('Cumulative commits', cumulative_commits);
         });
     </script>
 </body>
