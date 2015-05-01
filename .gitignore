@@ -1,4 +1,5 @@
 *.pyc
 django
-repo-stats.pickle
-series.js
+additions.js
+deletions.js
+*-stats.cache

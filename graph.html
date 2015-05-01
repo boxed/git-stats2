@@ -5,43 +5,30 @@
     <script src="http://code.highcharts.com/modules/exporting.js"></script>
 </head>
 <body>
-    <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
-
-    <script src="series.js"></script>
+    <script src="additions.js"></script>
+    <script src="deletions.js"></script>
 
     <script>
-        $(function () {
-            $('#container').highcharts({
-                chart: {
-                    type: 'spline'
-                },
-                title: {
-                    text: 'Asd'
-                },
-                subtitle: {
-                    text: 'Irregular time data in Highcharts JS'
-                },
+        function add_graph(title, series) {
+            var container = $('<div style="min-width: 310px; height: 400px; margin: 0 auto"></div>');
+            $('body').append(container);
+            container.highcharts({
+                chart: {type: 'spline'},
+                title: {text: title},
+//                subtitle: {text: ''},
                 xAxis: {
                     type: 'datetime',
-                    dateTimeLabelFormats: { // don't display the dummy year
-                        month: '%e. %b',
-                        year: '%b'
-                    },
-                    title: {
-                        text: 'Date'
-                    }
+                    title: {text: 'Date'}
                 },
                 yAxis: {
-                    title: {
-                        text: 'y axis asd'
-                    },
+                    title: {text: 'Lines'},
                     min: 0
                 },
                 tooltip: {
                     headerFormat: '<b>{series.name}</b><br>',
-                    pointFormat: '{point.x:%e. %b}: {point.y:.2f} m'
+                    pointFormat: '{point.x:%e. %b}: {point.y:.0f}'
                 },
-
+                legend: {enabled: false},
                 plotOptions: {
                     spline: {
                         marker: {
@@ -52,6 +39,11 @@
 
                 series: series
             });
+        }
+
+        $(function(){
+            add_graph('Additions', additions);
+//            add_graph('Deletions', deletions);
         });
     </script>
 </body>
