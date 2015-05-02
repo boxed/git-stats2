@@ -57,7 +57,7 @@ def get_and_update_repo_cache(repo_path):
                     if commit.hex not in blacklist_commits:
                         print 'WARNING: ignored %s looks like an embedding of a lib (message: %s)' % (commit.hex, commit.message)
                     continue
-                if additions > 3000 and commit.hex not in whitelist_commits:
+                if (additions > 3000 or deletions > 3000) and commit.hex not in whitelist_commits:
                     if commit.hex not in blacklist_commits and additions != deletions:  # Guess that if additions == deletions it's a big rename of files
                         print 'WARNING: ignored %s because it is bigger than 3k lines. Put this commit in the whitelist or the blacklist (message: %s)' % (commit.hex, commit.message)
                     continue
