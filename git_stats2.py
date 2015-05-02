@@ -32,7 +32,7 @@ def get_and_update_repo_cache(repo_path):
         data = {
             'author_to_month_to_additions': defaultdict(defaultdict_int),
             'author_to_month_to_deletions': defaultdict(defaultdict_int),
-            'author_to_month_to_commit_count': defaultdict(defaultdict_int),
+            'author_to_month_to_commits': defaultdict(defaultdict_int),
             'latest_sha': None,
         }
 
@@ -65,7 +65,7 @@ def get_and_update_repo_cache(repo_path):
                 month = date(month.year, month.month, 1)
                 data['author_to_month_to_additions'][commit.author.email][month] += additions
                 data['author_to_month_to_deletions'][commit.author.email][month] += deletions
-                data['author_to_month_to_commit_count'][commit.author.email][month] += 1
+                data['author_to_month_to_commits'][commit.author.email][month] += 1
                 if data['latest_sha'] is None:
                     data['latest_sha'] = commit.hex
 
@@ -96,9 +96,10 @@ def cumulative_series(series_data):
 
 def main():
     data = get_and_update_repo_cache('django')
-    write_series_file('additions', data['author_to_month_to_additions'])
-    write_series_file('deletions', data['author_to_month_to_deletions'])
-    write_series_file('cumulative_commits', cumulative_series(data['author_to_month_to_commit_count']))
+    for x in ['additions', 'deletions', 'commits']:
+        d = data['author_to_month_to_%s' % x]
+        write_series_file(x, d)
+        write_series_file('cumulative_%s' % x, cumulative_series(d))
 
 
 if __name__ == '__main__':
