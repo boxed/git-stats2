@@ -16,7 +16,7 @@ def read_sha_set_list_txt(filename):
 def read_aliases_txt(filename):
     try:
         with open(filename) as f:
-            return dict([[x.strip() for x in line.split(':')] for line in f.readlines() if line.strip()])
+            return dict([tuple(x.strip() for x in line.split(':')) for line in f.readlines() if line.strip()])
     except IOError:
         return {}
 
@@ -134,7 +134,7 @@ def main():
         write_series_file('cumulative_rebased_1900_%s' % x, rebase_series_to_1900(cumulative_series(d)))
 
     print 'Found authors:'
-    for author in data['author_to_month_to_additions'].keys():
+    for author in sorted(data['author_to_month_to_additions'].keys()):
         print '\t', author
     print 'update author-aliases-%s.txt to fix aliasing problems' % repo_name
 
