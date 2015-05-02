@@ -44,7 +44,7 @@ def get_and_update_repo_cache(repo_path):
             if data['latest_sha'] == commit.hex:
                 break
         
-            if not commit.message.startswith('Merge'):
+            if not commit.message.lower().startswith('merge'):
                 try:
                     d = repo.diff('%s^' % commit.hex, commit)
                 except KeyError:
@@ -56,9 +56,10 @@ def get_and_update_repo_cache(repo_path):
                 if additions > 1000 and deletions < 5 and commit.hex not in whitelist_commits:
                     if commit.hex not in blacklist_commits:
                         print 'WARNING: ignored %s looks like an embedding of a lib (message: %s)' % (commit.hex, commit.message)
-                if additions > 5000 and commit.hex not in whitelist_commits:
+                    continue
+                if additions > 3000 and commit.hex not in whitelist_commits:
                     if commit.hex not in blacklist_commits and additions != deletions:  # Guess that if additions == deletions it's a big rename of files
-                        print 'WARNING: ignored %s because it is bigger than 5k lines. Put this commit in the whitelist or the blacklist (message: %s)' % (commit.hex, commit.message)
+                        print 'WARNING: ignored %s because it is bigger than 3k lines. Put this commit in the whitelist or the blacklist (message: %s)' % (commit.hex, commit.message)
                     continue
                 month = date.fromtimestamp(commit.commit_time)
                 month = date(month.year, month.month, 1)
