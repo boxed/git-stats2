@@ -92,6 +92,17 @@ def cumulative_series(series_data):
             result[author][day] = amount
     return result
 
+def rebase_series_to_1900(series_data):
+    result = defaultdict(defaultdict_int)
+    for author, date_to_number in series_data.items():
+        amount = 0
+        months = list(sorted(date_to_number.items()))
+        date_diff = months[0][0] - date(1900, 1, 1)
+        for day, number in months:
+            amount += number
+            result[author][day - date_diff] = amount
+    return result
+
 
 def main():
     if len(sys.argv) != 2:
@@ -108,6 +119,7 @@ def main():
         d = data['author_to_month_to_%s' % x]
         write_series_file(x, d)
         write_series_file('cumulative_%s' % x, cumulative_series(d))
+        write_series_file('cumulative_rebased_1900_%s' % x, rebase_series_to_1900(cumulative_series(d)))
 
 
 if __name__ == '__main__':
