@@ -2,9 +2,8 @@ import os
 from collections import defaultdict
 from datetime import date
 from cPickle import dump, load
+import sys
 from pygit2 import Repository, GIT_SORT_TOPOLOGICAL, GIT_OBJ_COMMIT
-
-repo_name = 'django'
 
 
 def read_sha_set_list_txt(filename):
@@ -15,8 +14,8 @@ def read_sha_set_list_txt(filename):
         return set()
 
 
-whitelist_commits = read_sha_set_list_txt('whitelist-%s.txt' % repo_name)
-blacklist_commits = read_sha_set_list_txt('blacklist-%s.txt' % repo_name)
+whitelist_commits = []
+blacklist_commits = []
 
 
 def defaultdict_int():
@@ -59,7 +58,7 @@ def get_and_update_repo_cache(repo_path):
                         print 'WARNING: ignored %s looks like an embedding of a lib (message: %s)' % (commit.hex, commit.message)
                 if additions > 5000 and commit.hex not in whitelist_commits:
                     if commit.hex not in blacklist_commits and additions != deletions:  # Guess that if additions == deletions it's a big rename of files
-                        print 'WARNING: ignored %s because it is bigger than 5k lines. Put this commit in the whitelist or the blacklist' % commit.hex
+                        print 'WARNING: ignored %s because it is bigger than 5k lines. Put this commit in the whitelist or the blacklist (message: %s)' % (commit.hex, commit.message)
                     continue
                 month = date.fromtimestamp(commit.commit_time)
                 month = date(month.year, month.month, 1)
@@ -95,7 +94,16 @@ def cumulative_series(series_data):
 
 
 def main():
-    data = get_and_update_repo_cache('django')
+    if len(sys.argv) != 2:
+        print 'Usage: git_stats2.py repo'
+        exit(1)
+
+    repo_name = sys.argv[1]
+
+    whitelist_commits[:] = read_sha_set_list_txt('whitelist-%s.txt' % repo_name)
+    blacklist_commits[:] = read_sha_set_list_txt('blacklist-%s.txt' % repo_name)
+
+    data = get_and_update_repo_cache(repo_name)
     for x in ['additions', 'deletions', 'commits']:
         d = data['author_to_month_to_%s' % x]
         write_series_file(x, d)
