@@ -9,13 +9,21 @@ from pygit2 import Repository, GIT_SORT_TOPOLOGICAL, GIT_OBJ_COMMIT
 def read_sha_set_list_txt(filename):
     try:
         with open(filename) as f:
-            return set([x.strip() for x in f.readlines()])
+            return set([x.strip() for x in f.readlines() if x.strip()])
     except IOError:
         return set()
+
+def read_aliases_txt(filename):
+    try:
+        with open(filename) as f:
+            return dict([[x.strip() for x in line.split(':')] for line in f.readlines() if line.strip()])
+    except IOError:
+        return {}
 
 
 whitelist_commits = []
 blacklist_commits = []
+author_aliases = {}
 
 
 def defaultdict_int():
@@ -63,9 +71,10 @@ def get_and_update_repo_cache(repo_path):
                     continue
                 month = date.fromtimestamp(commit.commit_time)
                 month = date(month.year, month.month, 1)
-                data['author_to_month_to_additions'][commit.author.email][month] += additions
-                data['author_to_month_to_deletions'][commit.author.email][month] += deletions
-                data['author_to_month_to_commits'][commit.author.email][month] += 1
+                author = author_aliases.get(commit.author.email, commit.author.email)
+                data['author_to_month_to_additions'][author][month] += additions
+                data['author_to_month_to_deletions'][author][month] += deletions
+                data['author_to_month_to_commits'][author][month] += 1
                 if data['latest_sha'] is None:
                     data['latest_sha'] = commit.hex
 
@@ -114,13 +123,20 @@ def main():
 
     whitelist_commits[:] = read_sha_set_list_txt('whitelist-%s.txt' % repo_name)
     blacklist_commits[:] = read_sha_set_list_txt('blacklist-%s.txt' % repo_name)
+    author_aliases.update(read_aliases_txt('author-aliases-%s.txt' % repo_name))
 
     data = get_and_update_repo_cache(repo_name)
     for x in ['additions', 'deletions', 'commits']:
         d = data['author_to_month_to_%s' % x]
         write_series_file(x, d)
+        write_series_file('rebased_1900_%s' % x, rebase_series_to_1900(d))
         write_series_file('cumulative_%s' % x, cumulative_series(d))
         write_series_file('cumulative_rebased_1900_%s' % x, rebase_series_to_1900(cumulative_series(d)))
+
+    print 'Found authors:'
+    for author in data['author_to_month_to_additions'].keys():
+        print '\t', author
+    print 'update author-aliases-%s.txt to fix aliasing problems' % repo_name
 
 
 if __name__ == '__main__':
