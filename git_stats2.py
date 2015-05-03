@@ -13,6 +13,7 @@ def read_sha_set_list_txt(filename):
     except IOError:
         return set()
 
+
 def read_aliases_txt(filename):
     try:
         with open(filename) as f:
@@ -101,6 +102,7 @@ def cumulative_series(series_data):
             amount += number
             result[author][day] = amount
     return result
+
 
 def rebase_series_to_1900(series_data):
     result = defaultdict(defaultdict_int)

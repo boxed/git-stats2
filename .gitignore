@@ -6,4 +6,11 @@ commits.js
 cumulative_additions.js
 cumulative_deletions.js
 cumulative_commits.js
+additions_per_deletions.js          
+cumulative_rebased_1900_additions.js
+cumulative_rebased_1900_commits.js
+cumulative_rebased_1900_deletions.js
+rebased_1900_additions.js
+rebased_1900_commits.js
+rebased_1900_deletions.js
 *-stats.cache
