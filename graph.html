@@ -5,18 +5,29 @@
     <script src="http://code.highcharts.com/modules/exporting.js"></script>
 </head>
 <body>
-    <!--<script src="additions.js"></script>-->
-    <!--<script src="deletions.js"></script>-->
-    <!--<script src="commits.js"></script>-->
-    <!--<script src="cumulative_commits.js"></script>-->
-    <!--<script src="cumulative_additions.js"></script>-->
-    <!--<script src="cumulative_deletions.js"></script>-->
-    <script src="cumulative_rebased_1900_additions.js"></script>
-    <script src="lines_per_day.js"></script>
+    <button id="additions">Additions</button>
+    <button id="deletions">Deletions</button>
+    <button id="additions_per_deletions">Additions per deletions</button>
+    <button id="commits">Commits</button>
+    <button id="cumulative_additions">Cumulative additions</button>
+    <button id="cumulative_deletions">Cumulative deletions</button>
+    <button id="cumulative_commits">Cumulative commits</button>
+    <button id="cumulative_rebased_1900_additions">Cumulative additions per month since first commit</button>
+    <button id="cumulative_rebased_1900_deletions">Cumulative deletions per month since first commit</button>
+    <button id="cumulative_rebased_1900_commits">Cumulative commits per month since first commit</button>
+    <button id="rebased_1900_additions">Additions per month since first commit</button>
+    <button id="rebased_1900_deletions">Deletions per month since first commit</button>
+    <button id="rebased_1900_commits">Commits per month since first commit</button>
+    <button id="lines_per_day">Size of the code base over time</button>
 
-    <script>
-        function add_graph(title, series) {
-            var container = $('<div style="min-width: 310px; height: 400px; margin: 0 auto"></div>');
+    <script type="text/javascript">
+
+        function toggle_graph(title, id, series) {
+            if ($('#container_' + id).length != 0) {
+                $('#container_' + id).remove();
+                return;
+            }
+            var container = $('<div id="container_' + id + '" style="min-width: 310px; height: 400px; margin: 0 auto"></div>');
             $('body').append(container);
             container.highcharts({
                 chart: {type: 'spline'},
@@ -48,14 +59,13 @@
         }
 
         $(function(){
-//            add_graph('Additions', additions);
-//            add_graph('Deletions', deletions);
-//            add_graph('Commits', commits);
-//            add_graph('Cumulative commits', cumulative_commits);
-//            add_graph('Cumulative additions', cumulative_additions);
-//            add_graph('Cumulative deletions', cumulative_deletions);
-            add_graph('Cumulative additions per month since first commit', cumulative_rebased_1900_additions);
-            add_graph('Lines per month', lines_per_day);
+            $('button').each(function(i, obj){
+                var button = $(obj);
+                button.click(function() {
+                    $('body').append($('<script src="' + button.attr('id') + '.js"/>'));
+                    toggle_graph(button.html(), button.attr('id'), eval(button.attr('id')));
+                });
+            });
         });
     </script>
 </body>
