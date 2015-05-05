@@ -41,6 +41,7 @@ def get_and_update_repo_cache(repo_path):
             'author_to_month_to_additions': defaultdict(defaultdict_int),
             'author_to_month_to_deletions': defaultdict(defaultdict_int),
             'author_to_month_to_commits': defaultdict(defaultdict_int),
+            'day_to_count': defaultdict(defaultdict_int),
             'latest_sha': None,
         }
 
@@ -62,6 +63,13 @@ def get_and_update_repo_cache(repo_path):
                 patches = list(d)
                 additions = sum([p.additions for p in patches])
                 deletions = sum([p.deletions for p in patches])
+
+                author = author_aliases.get(commit.author.email, commit.author.email)
+
+                day = date.fromtimestamp(commit.commit_time)
+                data['day_to_count']['Lines'][day] += additions
+                data['day_to_count']['Lines'][day] -= deletions
+
                 if additions > 1000 and deletions < 5 and commit.hex not in whitelist_commits:
                     if commit.hex not in blacklist_commits:
                         print 'WARNING: ignored %s looks like an embedding of a lib (message: %s)' % (commit.hex, commit.message)
@@ -70,9 +78,7 @@ def get_and_update_repo_cache(repo_path):
                     if commit.hex not in blacklist_commits and additions != deletions:  # Guess that if additions == deletions it's a big rename of files
                         print 'WARNING: ignored %s because it is bigger than 3k lines. Put this commit in the whitelist or the blacklist (message: %s)' % (commit.hex, commit.message)
                     continue
-                month = date.fromtimestamp(commit.commit_time)
-                month = date(month.year, month.month, 1)
-                author = author_aliases.get(commit.author.email, commit.author.email)
+                month = date(day.year, day.month, 1)
                 data['author_to_month_to_additions'][author][month] += additions
                 data['author_to_month_to_deletions'][author][month] += deletions
                 data['author_to_month_to_commits'][author][month] += 1
@@ -89,11 +95,13 @@ def format_series(name, data_points):
     return "{name: '%s', data: [%s]}," % (name, ', \n'.join(data_points))
 
 
-def author_to_month_to_number_formatter(series_data):
+def date_and_number_formatter(day, number):
+    return '[Date.UTC(%s, %s, %s), %s]' % (day.year, day.month - 1, day.day, number)
+
+
+def author_to_day_to_number_formatter(series_data):
     for author, date_to_number in sorted(series_data.items()):
-        data_points = ['[Date.UTC(%s, %s, %s), %s]' % (day.year, day.month - 1, day.day, number)
-                       for day, number in sorted(date_to_number.items())]
-        yield format_series(author, data_points)
+        yield format_series(author, (date_and_number_formatter(day, number) for day, number in sorted(date_to_number.items())))
 
 
 def write_series_file(formatter, series_name, series_data):
@@ -140,10 +148,12 @@ def main():
     data = get_and_update_repo_cache(repo_name)
     for x in ['additions', 'deletions', 'commits']:
         d = data['author_to_month_to_%s' % x]
-        write_series_file(author_to_month_to_number_formatter, x, d)
-        write_series_file(author_to_month_to_number_formatter, 'rebased_1900_%s' % x, rebase_series_to_1900(d))
-        write_series_file(author_to_month_to_number_formatter, 'cumulative_%s' % x, cumulative_series(d))
-        write_series_file(author_to_month_to_number_formatter, 'cumulative_rebased_1900_%s' % x, rebase_series_to_1900(cumulative_series(d)))
+        write_series_file(author_to_day_to_number_formatter, x, d)
+        write_series_file(author_to_day_to_number_formatter, 'rebased_1900_%s' % x, rebase_series_to_1900(d))
+        write_series_file(author_to_day_to_number_formatter, 'cumulative_%s' % x, cumulative_series(d))
+        write_series_file(author_to_day_to_number_formatter, 'cumulative_rebased_1900_%s' % x, rebase_series_to_1900(cumulative_series(d)))
+
+    write_series_file(author_to_day_to_number_formatter, 'lines_per_day', cumulative_series(data['day_to_count']))
 
     print 'Found authors:'
     for author in sorted(data['author_to_month_to_additions'].keys()):

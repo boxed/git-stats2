@@ -12,6 +12,7 @@
     <!--<script src="cumulative_additions.js"></script>-->
     <!--<script src="cumulative_deletions.js"></script>-->
     <script src="cumulative_rebased_1900_additions.js"></script>
+    <script src="lines_per_day.js"></script>
 
     <script>
         function add_graph(title, series) {
@@ -53,7 +54,8 @@
 //            add_graph('Cumulative commits', cumulative_commits);
 //            add_graph('Cumulative additions', cumulative_additions);
 //            add_graph('Cumulative deletions', cumulative_deletions);
-            add_graph('Cumulative additions per month since first commit', cumulative_rebased_1900_additions)
+            add_graph('Cumulative additions per month since first commit', cumulative_rebased_1900_additions);
+            add_graph('Lines per month', lines_per_day);
         });
     </script>
 </body>
