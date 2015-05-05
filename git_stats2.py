@@ -85,12 +85,22 @@ def get_and_update_repo_cache(repo_path):
     return data
 
 
-def write_series_file(series_name, series_data):
+def format_series(name, data_points):
+    return "{name: '%s', data: [%s]}," % (name, ', \n'.join(data_points))
+
+
+def author_to_month_to_number_formatter(series_data):
+    for author, date_to_number in sorted(series_data.items()):
+        data_points = ['[Date.UTC(%s, %s, %s), %s]' % (day.year, day.month - 1, day.day, number)
+                       for day, number in sorted(date_to_number.items())]
+        yield format_series(author, data_points)
+
+
+def write_series_file(formatter, series_name, series_data):
     with open('%s.js' % series_name, 'w') as output:
         output.write('var %s = [' % series_name)
-        for author, date_to_number in series_data.items():
-            data_points = ', \n'.join(['[Date.UTC(%s, %s, %s), %s]' % (day.year, day.month - 1, day.day, number) for day, number in sorted(date_to_number.items())])
-            output.write("""{name: '%s', data: [%s]},""" % (author, data_points))
+        for x in formatter(series_data):
+            output.write(x)
         output.write('];')
 
 
@@ -130,10 +140,10 @@ def main():
     data = get_and_update_repo_cache(repo_name)
     for x in ['additions', 'deletions', 'commits']:
         d = data['author_to_month_to_%s' % x]
-        write_series_file(x, d)
-        write_series_file('rebased_1900_%s' % x, rebase_series_to_1900(d))
-        write_series_file('cumulative_%s' % x, cumulative_series(d))
-        write_series_file('cumulative_rebased_1900_%s' % x, rebase_series_to_1900(cumulative_series(d)))
+        write_series_file(author_to_month_to_number_formatter, x, d)
+        write_series_file(author_to_month_to_number_formatter, 'rebased_1900_%s' % x, rebase_series_to_1900(d))
+        write_series_file(author_to_month_to_number_formatter, 'cumulative_%s' % x, cumulative_series(d))
+        write_series_file(author_to_month_to_number_formatter, 'cumulative_rebased_1900_%s' % x, rebase_series_to_1900(cumulative_series(d)))
 
     print 'Found authors:'
     for author in sorted(data['author_to_month_to_additions'].keys()):
