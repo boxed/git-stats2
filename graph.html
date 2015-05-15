@@ -1,0 +1,72 @@
+<html>
+<head>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="http://code.highcharts.com/modules/exporting.js"></script>
+</head>
+<body>
+    <button id="additions">Additions</button>
+    <button id="deletions">Deletions</button>
+    <button id="additions_per_deletions">Additions per deletions</button>
+    <button id="commits">Commits</button>
+    <button id="cumulative_additions">Cumulative additions</button>
+    <button id="cumulative_deletions">Cumulative deletions</button>
+    <button id="cumulative_commits">Cumulative commits</button>
+    <button id="cumulative_rebased_1900_additions">Cumulative additions per month since first commit</button>
+    <button id="cumulative_rebased_1900_deletions">Cumulative deletions per month since first commit</button>
+    <button id="cumulative_rebased_1900_commits">Cumulative commits per month since first commit</button>
+    <button id="rebased_1900_additions">Additions per month since first commit</button>
+    <button id="rebased_1900_deletions">Deletions per month since first commit</button>
+    <button id="rebased_1900_commits">Commits per month since first commit</button>
+    <button id="lines_per_day">Size of the code base over time</button>
+
+    <script type="text/javascript">
+
+        function toggle_graph(title, id, series) {
+            if ($('#container_' + id).length != 0) {
+                $('#container_' + id).remove();
+                return;
+            }
+            var container = $('<div id="container_' + id + '" style="min-width: 310px; height: 400px; margin: 0 auto"></div>');
+            $('body').append(container);
+            container.highcharts({
+                chart: {type: 'spline'},
+                title: {text: title},
+//                subtitle: {text: ''},
+                xAxis: {
+                    type: 'datetime',
+                    title: {text: 'Date'}
+                },
+                yAxis: {
+                    title: {text: 'Lines'},
+                    min: 0
+                },
+                tooltip: {
+                    headerFormat: '<b>{series.name}</b><br>',
+                    pointFormat: '{point.x:%e. %b}: {point.y:.0f}'
+                },
+                legend: {enabled: false},
+                plotOptions: {
+                    spline: {
+                        marker: {
+                            enabled: true
+                        }
+                    }
+                },
+
+                series: series
+            });
+        }
+
+        $(function(){
+            $('button').each(function(i, obj){
+                var button = $(obj);
+                button.click(function() {
+                    $('body').append($('<script src="' + button.attr('id') + '.js"/>'));
+                    toggle_graph(button.html(), button.attr('id'), eval(button.attr('id')));
+                });
+            });
+        });
+    </script>
+</body>
+</html>
