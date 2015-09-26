@@ -33,8 +33,8 @@ def defaultdict_int():
     return defaultdict(int)
 
 
-def get_and_update_repo_cache(repo_path):
-    cache_filename = '%s-stats.cache' % repo_path
+def get_and_update_repo_cache(repo_path, repo_name):
+    cache_filename = '%s-stats.cache' % repo_name
     if os.path.exists(cache_filename):
         with open(cache_filename) as f:
             data = load(f)
@@ -141,13 +141,14 @@ def main():
         print 'Usage: git_stats2.py repo'
         exit(1)
 
-    repo_name = sys.argv[1]
+    repo_path = sys.argv[1]
+    repo_name = os.path.split(os.path.abspath(repo_path))[-1]
 
     whitelist_commits[:] = read_sha_set_list_txt('whitelist-%s.txt' % repo_name)
     blacklist_commits[:] = read_sha_set_list_txt('blacklist-%s.txt' % repo_name)
     author_aliases.update(read_aliases_txt('author-aliases-%s.txt' % repo_name))
 
-    data = get_and_update_repo_cache(repo_name)
+    data = get_and_update_repo_cache(repo_path=repo_path, repo_name=repo_name)
     for x in ['additions', 'deletions', 'commits']:
         d = data['author_to_month_to_%s' % x]
         write_series_file(author_to_day_to_number_formatter, x, d)
