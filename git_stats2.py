@@ -127,12 +127,10 @@ def cumulative_series(series_data):
 def rebase_series_to_1900(series_data):
     result = defaultdict(defaultdict_int)
     for author, date_to_number in series_data.items():
-        amount = 0
         months = list(sorted(date_to_number.items()))
         date_diff = months[0][0] - date(1900, 1, 1)
         for day, number in months:
-            amount += number
-            result[author][day - date_diff] = amount
+            result[author][day - date_diff] = number
     return result
 
 
