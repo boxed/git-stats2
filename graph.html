@@ -5,19 +5,34 @@
     <script src="http://code.highcharts.com/modules/exporting.js"></script>
 </head>
 <body>
-    <button id="additions">Additions</button>
-    <button id="deletions">Deletions</button>
-    <button id="commits">Commits</button>
-    <button id="cumulative_additions">Cumulative additions</button>
-    <button id="cumulative_deletions">Cumulative deletions</button>
-    <button id="cumulative_commits">Cumulative commits</button>
-    <button id="cumulative_rebased_1900_additions">Cumulative additions per month since first commit</button>
-    <button id="cumulative_rebased_1900_deletions">Cumulative deletions per month since first commit</button>
-    <button id="cumulative_rebased_1900_commits">Cumulative commits per month since first commit</button>
-    <button id="rebased_1900_additions">Additions per month since first commit</button>
-    <button id="rebased_1900_deletions">Deletions per month since first commit</button>
-    <button id="rebased_1900_commits">Commits per month since first commit</button>
-    <button id="lines_per_day">Size of the code base over time</button>
+    <div>
+        Per month:
+        <button id="additions">Additions</button>
+        <button id="deletions">Deletions</button>
+        <button id="commits">Commits</button>
+    </div>
+    <div>
+        Cumulative per month:
+        <button id="cumulative_additions">Additions</button>
+        <button id="cumulative_deletions">Deletions</button>
+        <button id="cumulative_commits">Commits</button>
+    </div>
+    <div>
+        Per month since first commit:
+        <button id="rebased_1900_additions">Additions </button>
+        <button id="rebased_1900_deletions">Deletions</button>
+        <button id="rebased_1900_commits">Commits</button>
+    </div>
+    <div>
+        Cumulative per month since first commit:
+        <button id="cumulative_rebased_1900_additions">Additions</button>
+        <button id="cumulative_rebased_1900_deletions">Deletions</button>
+        <button id="cumulative_rebased_1900_commits">Commits</button>
+    </div>
+    <div>
+        Misc:
+        <button id="lines_per_day">Size of the code base over time</button>
+    </div>
 
     <style scoped>
         button {
