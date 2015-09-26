@@ -19,13 +19,30 @@
     <button id="rebased_1900_commits">Commits per month since first commit</button>
     <button id="lines_per_day">Size of the code base over time</button>
 
+    <style scoped>
+        button {
+            background-color: white;
+            color: black;
+            border: 1px solid black;
+            -webkit-border-radius: 4px;
+            -moz-border-radius: 4px;
+            border-radius: 4px;
+        }
+        .toggled_on {
+            background-color: black;
+            color: white;
+        }
+    </style>
+
     <script type="text/javascript">
 
         function toggle_graph(title, id, series) {
             if ($('#container_' + id).length != 0) {
                 $('#container_' + id).remove();
+                $('#'+id).removeClass('toggled_on');
                 return;
             }
+            $('#'+id).addClass('toggled_on');
             var container = $('<div id="container_' + id + '" style="min-width: 310px; height: 400px; margin: 0 auto"></div>');
             $('body').append(container);
             container.highcharts({
