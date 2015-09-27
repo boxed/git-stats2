@@ -3,38 +3,51 @@
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script src="http://code.highcharts.com/highcharts.js"></script>
     <script src="http://code.highcharts.com/modules/exporting.js"></script>
+    <script src="repo_details.js"></script>
 </head>
 <body>
-    <div>
-        Per month:
-        <button id="additions">Additions</button>
-        <button id="deletions">Deletions</button>
-        <button id="commits">Commits</button>
-    </div>
-    <div>
-        Cumulative per month:
-        <button id="cumulative_additions">Additions</button>
-        <button id="cumulative_deletions">Deletions</button>
-        <button id="cumulative_commits">Commits</button>
-    </div>
-    <div>
-        Per month since first commit:
-        <button id="rebased_1900_additions">Additions </button>
-        <button id="rebased_1900_deletions">Deletions</button>
-        <button id="rebased_1900_commits">Commits</button>
-    </div>
-    <div>
-        Cumulative per month since first commit:
-        <button id="cumulative_rebased_1900_additions">Additions</button>
-        <button id="cumulative_rebased_1900_deletions">Deletions</button>
-        <button id="cumulative_rebased_1900_commits">Commits</button>
-    </div>
-    <div>
-        Misc:
-        <button id="lines_per_day">Size of the code base over time</button>
-    </div>
+    <h1></h1>
+    <table>
+        <tr>
+            <th>Per month:</th>
+            <td><button id="additions">Additions</button></td>
+            <td><button id="deletions">Deletions</button></td>
+            <td><button id="commits">Commits</button></td>
+        </tr>
+        <tr>
+            <th>Cumulative per month:</th>
+            <td><button id="cumulative_additions">Additions</button></td>
+            <td><button id="cumulative_deletions">Deletions</button></td>
+            <td><button id="cumulative_commits">Commits</button></td>
+        </tr>
+        <tr>
+            <th>Per month since first commit:</th>
+            <td><button id="rebased_1900_additions">Additions </button></td>
+            <td><button id="rebased_1900_deletions">Deletions</button></td>
+            <td><button id="rebased_1900_commits">Commits</button></td>
+        </tr>
+        <tr>
+            <th>Cumulative per month since first commit:</th>
+            <td><button id="cumulative_rebased_1900_additions">Additions</button></td>
+            <td><button id="cumulative_rebased_1900_deletions">Deletions</button></td>
+            <td><button id="cumulative_rebased_1900_commits">Commits</button></td>
+        </tr>
+        <tr>
+            <th>Misc:</th>
+            <td colspan="2"><button id="lines_per_day">Size of the code base over time</button></td>
+        </tr>
+    </table>
 
     <style scoped>
+        body {
+            text-align: center;
+        }
+        th {
+            text-align: right;
+        }
+        td {
+            max-width: 80px;
+        }
         button {
             background-color: white;
             color: black;
@@ -42,6 +55,7 @@
             -webkit-border-radius: 4px;
             -moz-border-radius: 4px;
             border-radius: 4px;
+            white-space: nowrap;
         }
         .toggled_on {
             background-color: black;
@@ -109,6 +123,8 @@
                     toggle_graph(button.html(), button.attr('id'), eval(button.attr('id')));
                 });
             });
+
+            $('h1').text('Statistics for '+ repo_name);
         });
     </script>
 </body>
