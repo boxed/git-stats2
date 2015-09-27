@@ -142,6 +142,9 @@ def main():
     repo_path = sys.argv[1]
     repo_name = os.path.split(os.path.abspath(repo_path))[-1]
 
+    with open('repo_details.js', 'w') as f:
+        f.write('var repo_name = "%s";' % repo_name)
+
     whitelist_commits[:] = read_sha_set_list_txt('whitelist-%s.txt' % repo_name)
     blacklist_commits[:] = read_sha_set_list_txt('blacklist-%s.txt' % repo_name)
     author_aliases.update(read_aliases_txt('author-aliases-%s.txt' % repo_name))
