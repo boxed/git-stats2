@@ -73,45 +73,47 @@
             }
             var is_rebased = id.indexOf('rebased') != -1;
             $('#'+id).addClass('toggled_on');
-            var container = $('<div id="container_' + id + '" style="min-width: 310px; height: 400px; margin: 0 auto"></div>');
-            $('body').append(container);
-            container.highcharts({
-                chart: {type: 'spline'},
-                title: {text: title},
-//                subtitle: {text: ''},
-                xAxis: {
-                    type: 'datetime',
-                    title: {text: 'Date'},
-                    labels: {
-                        formatter: is_rebased? function() {
-                            var months = Math.round((this.value + 2208988800000) / (1000*60*60*24*30));
-                            if (months < 12) {
-                                return months + ' months';
-                            }
-                            var years = Math.floor(months / 12);
-                            months -= years*12;
-                            return years + ' y, ' + months + ' m';
-                        }: undefined
-                    }
-                },
-                yAxis: {
-                    title: {text: 'Lines'},
-                    min: 0
-                },
-                tooltip: {
-                    headerFormat: '<b>{series.name}</b><br>',
-                    pointFormat: '{point.x:%e. %b}: {point.y:.0f}'
-                },
-                legend: {enabled: false},
-                plotOptions: {
-                    spline: {
-                        marker: {
-                            enabled: true
+            window.setTimeout(function(){
+                var container = $('<div id="container_' + id + '" style="min-width: 310px; height: 400px; margin: 0 auto"></div>');
+                $('body').append(container);
+                container.highcharts({
+                    chart: {type: 'spline'},
+                    title: {text: title},
+    //                subtitle: {text: ''},
+                    xAxis: {
+                        type: 'datetime',
+                        title: {text: 'Date'},
+                        labels: {
+                            formatter: is_rebased? function() {
+                                var months = Math.round((this.value + 2208988800000) / (1000*60*60*24*30));
+                                if (months < 12) {
+                                    return months + ' months';
+                                }
+                                var years = Math.floor(months / 12);
+                                months -= years*12;
+                                return years + ' y, ' + months + ' m';
+                            }: undefined
                         }
-                    }
-                },
+                    },
+                    yAxis: {
+                        title: {text: 'Lines'},
+                        min: 0
+                    },
+                    tooltip: {
+                        headerFormat: '<b>{series.name}</b><br>',
+                        pointFormat: '{point.x:%e. %b}: {point.y:.0f}'
+                    },
+                    legend: {enabled: false},
+                    plotOptions: {
+                        spline: {
+                            marker: {
+                                enabled: true
+                            }
+                        }
+                    },
 
-                series: series
+                    series: series
+                });
             });
         }
 
