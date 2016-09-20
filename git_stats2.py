@@ -49,6 +49,8 @@ def get_and_update_repo_cache(repo_path, repo_name):
 
     repo = Repository(repo_path)
 
+    ignored_commits = []
+
     count = 0
     for commit in repo.walk(repo.head.target, GIT_SORT_TOPOLOGICAL):
         count += 1
@@ -74,11 +76,13 @@ def get_and_update_repo_cache(repo_path, repo_name):
 
                 if additions > 1000 and deletions < 5 and commit.hex not in whitelist_commits:
                     if commit.hex not in blacklist_commits:
-                        print 'WARNING: ignored %s looks like an embedding of a lib (message: %s)' % (commit.hex, commit.message)
+                        ignored_commits.append(commit.hex)
+                        # print 'WARNING: ignored %s looks like an embedding of a lib (message: %s)' % (commit.hex, commit.message)
                     continue
                 if (additions > 3000 or deletions > 3000) and commit.hex not in whitelist_commits:
-                    if commit.hex not in blacklist_commits and additions != deletions:  # Guess that if additions == deletions it's a big rename of files
-                        print 'WARNING: ignored %s because it is bigger than 3k lines. Put this commit in the whitelist or the blacklist (message: %s)' % (commit.hex, commit.message)
+                    if commit.hex not in blacklist_commits:
+                        ignored_commits.append(commit.hex)
+                        # print 'WARNING: ignored %s because it is bigger than 3k lines. Put this commit in the whitelist or the blacklist (message: %s)' % (commit.hex, commit.message)
                     continue
                 month = date(day.year, day.month, 1)
                 data['author_to_month_to_additions'][author][month] += additions
@@ -89,6 +93,9 @@ def get_and_update_repo_cache(repo_path, repo_name):
 
     with open(cache_filename, 'w') as f:
         dump(data, f)
+
+    with open(repo_name + '-ignored-commits.txt', 'w') as f:
+        f.writelines('%s\n' % x for x in ignored_commits)
 
     return data
 
