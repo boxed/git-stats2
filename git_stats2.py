@@ -64,9 +64,8 @@ def get_and_update_repo_cache(repo_path, repo_name):
                 except KeyError:
                     # First commit!
                     break
-                patches = list(d)
-                additions = sum([p.additions for p in patches])
-                deletions = sum([p.deletions for p in patches])
+                additions = d.stats.insertions
+                deletions = d.stats.deletions
 
                 author = author_aliases.get(commit.author.email, commit.author.email)
 
