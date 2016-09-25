@@ -12,24 +12,28 @@
             <th>Per month:</th>
             <td><button id="additions">Additions</button></td>
             <td><button id="deletions">Deletions</button></td>
+            <td><button id="changes">Changes</button></td>
             <td><button id="commits">Commits</button></td>
         </tr>
         <tr>
             <th>Cumulative per month:</th>
             <td><button id="cumulative_additions">Additions</button></td>
             <td><button id="cumulative_deletions">Deletions</button></td>
+            <td><button id="cumulative_changes">Changes</button></td>
             <td><button id="cumulative_commits">Commits</button></td>
         </tr>
         <tr>
             <th>Per month since first commit:</th>
             <td><button id="rebased_1900_additions">Additions </button></td>
             <td><button id="rebased_1900_deletions">Deletions</button></td>
+            <td><button id="rebased_1900_changes">Changes</button></td>
             <td><button id="rebased_1900_commits">Commits</button></td>
         </tr>
         <tr>
             <th>Cumulative per month since first commit:</th>
             <td><button id="cumulative_rebased_1900_additions">Additions</button></td>
             <td><button id="cumulative_rebased_1900_deletions">Deletions</button></td>
+            <td><button id="cumulative_rebased_1900_changes">Changes</button></td>
             <td><button id="cumulative_rebased_1900_commits">Commits</button></td>
         </tr>
         <tr>
@@ -74,7 +78,7 @@
             var is_rebased = id.indexOf('rebased') != -1;
             $('#'+id).addClass('toggled_on');
             window.setTimeout(function(){
-                var container = $('<div id="container_' + id + '" style="min-width: 310px; height: 400px; margin: 0 auto"></div>');
+                var container = $('<div id="container_' + id + '" style="min-width: 310px; height: 600px; margin: 0 auto"></div>');
                 $('body').append(container);
                 container.highcharts({
                     chart: {type: 'spline'},

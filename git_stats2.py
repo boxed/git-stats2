@@ -42,6 +42,7 @@ def get_and_update_repo_cache(repo_path, repo_name):
         data = {
             'author_to_month_to_additions': defaultdict(defaultdict_int),
             'author_to_month_to_deletions': defaultdict(defaultdict_int),
+            'author_to_month_to_changes': defaultdict(defaultdict_int),
             'author_to_month_to_commits': defaultdict(defaultdict_int),
             'day_to_count': defaultdict(defaultdict_int),
             'latest_sha': None,
@@ -58,37 +59,37 @@ def get_and_update_repo_cache(repo_path, repo_name):
             if data['latest_sha'] == commit.hex:
                 break
         
-            if not commit.message.lower().startswith('merge'):
-                try:
-                    d = repo.diff('%s^' % commit.hex, commit)
-                except KeyError:
-                    # First commit!
-                    break
-                additions = d.stats.insertions
-                deletions = d.stats.deletions
+            try:
+                d = repo.diff('%s^' % commit.hex, commit)
+            except KeyError:
+                print "Commits without parent: ", commit.hex
+                continue
+            additions = d.stats.insertions
+            deletions = d.stats.deletions
 
-                author = author_aliases.get(commit.author.email, commit.author.email)
+            author = author_aliases.get(commit.author.email, commit.author.email)
 
-                day = date.fromtimestamp(commit.commit_time)
-                data['day_to_count']['Lines'][day] += additions
-                data['day_to_count']['Lines'][day] -= deletions
+            day = date.fromtimestamp(commit.commit_time)
+            data['day_to_count']['Lines'][day] += additions
+            data['day_to_count']['Lines'][day] -= deletions
 
-                if additions > 1000 and deletions < 5 and commit.hex not in whitelist_commits:
-                    if commit.hex not in blacklist_commits:
-                        ignored_commits.append(commit.hex)
-                        # print 'WARNING: ignored %s looks like an embedding of a lib (message: %s)' % (commit.hex, commit.message)
-                    continue
-                if (additions > 3000 or deletions > 3000) and commit.hex not in whitelist_commits:
-                    if commit.hex not in blacklist_commits:
-                        ignored_commits.append(commit.hex)
-                        # print 'WARNING: ignored %s because it is bigger than 3k lines. Put this commit in the whitelist or the blacklist (message: %s)' % (commit.hex, commit.message)
-                    continue
-                month = date(day.year, day.month, 1)
-                data['author_to_month_to_additions'][author][month] += additions
-                data['author_to_month_to_deletions'][author][month] += deletions
-                data['author_to_month_to_commits'][author][month] += 1
-                if data['latest_sha'] is None:
-                    data['latest_sha'] = commit.hex
+            if additions > 1000 and deletions < 5 and commit.hex not in whitelist_commits:
+                if commit.hex not in blacklist_commits:
+                    ignored_commits.append(commit.hex)
+                    # print 'WARNING: ignored %s looks like an embedding of a lib (message: %s)' % (commit.hex, commit.message)
+                continue
+            if (additions > 3000 or deletions > 3000) and commit.hex not in whitelist_commits:
+                if commit.hex not in blacklist_commits:
+                    ignored_commits.append(commit.hex)
+                    # print 'WARNING: ignored %s because it is bigger than 3k lines. Put this commit in the whitelist or the blacklist (message: %s)' % (commit.hex, commit.message)
+                continue
+            month = date(day.year, day.month, 1)
+            data['author_to_month_to_additions'][author][month] += additions
+            data['author_to_month_to_deletions'][author][month] += deletions
+            data['author_to_month_to_changes'][author][month] += additions + deletions
+            data['author_to_month_to_commits'][author][month] += 1
+            if data['latest_sha'] is None:
+                data['latest_sha'] = commit.hex
 
     with open(cache_filename, 'w') as f:
         dump(data, f)
@@ -156,7 +157,7 @@ def main():
     author_aliases.update(read_aliases_txt('author-aliases-%s.txt' % repo_name))
 
     data = get_and_update_repo_cache(repo_path=repo_path, repo_name=repo_name)
-    for x in ['additions', 'deletions', 'commits']:
+    for x in ['additions', 'deletions', 'changes', 'commits']:
         d = data['author_to_month_to_%s' % x]
         write_series_file(author_to_day_to_number_formatter, x, d)
         write_series_file(author_to_day_to_number_formatter, 'rebased_1900_%s' % x, rebase_series_to_1900(d))
