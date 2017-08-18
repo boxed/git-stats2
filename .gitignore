@@ -3,3 +3,4 @@ django
 example/
 *-stats.cache
 .idea
+venv/

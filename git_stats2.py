@@ -45,6 +45,7 @@ def get_and_update_repo_cache(repo_path, repo_name):
             'author_to_month_to_changes': defaultdict(defaultdict_int),
             'author_to_month_to_commits': defaultdict(defaultdict_int),
             'day_to_count': defaultdict(defaultdict_int),
+            'change_count_by_file': defaultdict(int),
             'latest_sha': None,
         }
 
@@ -58,7 +59,7 @@ def get_and_update_repo_cache(repo_path, repo_name):
         if commit.type == GIT_OBJ_COMMIT:
             if data['latest_sha'] == commit.hex:
                 break
-        
+
             try:
                 d = repo.diff('%s^' % commit.hex, commit)
             except KeyError:
@@ -91,6 +92,10 @@ def get_and_update_repo_cache(repo_path, repo_name):
             if data['latest_sha'] is None:
                 data['latest_sha'] = commit.hex
 
+            if d.patch:
+                for changed_path in [x for x in d.patch.split('\n') if x.startswith('+++ ') and '/dev/null' not in x]:
+                    data['change_count_by_file'][changed_path[len('+++ ') + 1:]] += 1
+
     with open(cache_filename, 'w') as f:
         dump(data, f)
 
@@ -111,6 +116,11 @@ def date_and_number_formatter(day, number):
 def author_to_day_to_number_formatter(series_data):
     for author, date_to_number in sorted(series_data.items()):
         yield format_series(author, (date_and_number_formatter(day, number) for day, number in sorted(date_to_number.items())))
+
+
+def change_count_by_file_formatter(series_data):
+    for file, count in series_data:
+        yield "{'%s': %s},\n" % (file, count)
 
 
 def write_series_file(formatter, series_name, series_data):
@@ -166,10 +176,15 @@ def main():
 
     write_series_file(author_to_day_to_number_formatter, 'lines_per_day', cumulative_series(data['day_to_count']))
 
-    print 'Found authors:'
-    for author in sorted(data['author_to_month_to_additions'].keys()):
-        print '\t', author
-    print 'update author-aliases-%s.txt to fix aliasing problems' % repo_name
+    write_series_file(change_count_by_file_formatter, 'change_count_by_file', sorted(data['change_count_by_file'].items(), reverse=True, key=lambda x: x[1]))
+
+    author_aliases_values = set(author_aliases.values())
+    new_authors = [x for x in sorted(data['author_to_month_to_additions'].keys()) if x not in author_aliases and x not in author_aliases_values]
+    if new_authors:
+        print 'Found authors not in alias file:'
+        for author in new_authors:
+            print '\t', author
+    print 'update author-aliases-%s.txt to fix aliasing problems. The format is <email from git>:<value to use in output>' % repo_name
 
 
 if __name__ == '__main__':
