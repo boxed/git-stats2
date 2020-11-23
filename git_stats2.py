@@ -3,7 +3,7 @@
 import os
 from collections import defaultdict
 from datetime import date
-from cPickle import dump, load
+from pickle import dump, load
 import sys
 from pygit2 import Repository, GIT_SORT_TOPOLOGICAL, GIT_OBJ_COMMIT
 
@@ -36,7 +36,7 @@ def defaultdict_int():
 def get_and_update_repo_cache(repo_path, repo_name):
     cache_filename = '%s-stats.cache' % repo_name
     if os.path.exists(cache_filename):
-        with open(cache_filename) as f:
+        with open(cache_filename, 'rb') as f:
             data = load(f)
     else:
         data = {
@@ -63,7 +63,7 @@ def get_and_update_repo_cache(repo_path, repo_name):
             try:
                 d = repo.diff('%s^' % commit.hex, commit)
             except KeyError:
-                print "Commits without parent: ", commit.hex
+                print("Commits without parent: ", commit.hex)
                 continue
             additions = d.stats.insertions
             deletions = d.stats.deletions
@@ -96,7 +96,7 @@ def get_and_update_repo_cache(repo_path, repo_name):
                 for changed_path in [x for x in d.patch.split('\n') if x.startswith('+++ ') and '/dev/null' not in x]:
                     data['change_count_by_file'][changed_path[len('+++ ') + 1:]] += 1
 
-    with open(cache_filename, 'w') as f:
+    with open(cache_filename, 'wb') as f:
         dump(data, f)
 
     with open(repo_name + '-ignored-commits.txt', 'w') as f:
@@ -133,7 +133,7 @@ def write_series_file(formatter, series_name, series_data):
 
 def cumulative_series(series_data):
     result = defaultdict(defaultdict_int)
-    for author, date_to_number in series_data.items():
+    for author, date_to_number in list(series_data.items()):
         amount = 0
         for day, number in sorted(date_to_number.items()):
             amount += number
@@ -143,7 +143,7 @@ def cumulative_series(series_data):
 
 def rebase_series_to_1900(series_data):
     result = defaultdict(defaultdict_int)
-    for author, date_to_number in series_data.items():
+    for author, date_to_number in list(series_data.items()):
         months = list(sorted(date_to_number.items()))
         date_diff = months[0][0] - date(1900, 1, 1)
         for day, number in months:
@@ -153,7 +153,7 @@ def rebase_series_to_1900(series_data):
 
 def main():
     if len(sys.argv) != 2:
-        print 'Usage: git_stats2.py repo'
+        print('Usage: git_stats2.py repo')
         exit(1)
 
     repo_path = sys.argv[1]
@@ -176,15 +176,15 @@ def main():
 
     write_series_file(author_to_day_to_number_formatter, 'lines_per_day', cumulative_series(data['day_to_count']))
 
-    write_series_file(change_count_by_file_formatter, 'change_count_by_file', sorted(data['change_count_by_file'].items(), reverse=True, key=lambda x: x[1]))
+    write_series_file(change_count_by_file_formatter, 'change_count_by_file', sorted(list(data['change_count_by_file'].items()), reverse=True, key=lambda x: x[1]))
 
     author_aliases_values = set(author_aliases.values())
     new_authors = [x for x in sorted(data['author_to_month_to_additions'].keys()) if x not in author_aliases and x not in author_aliases_values]
     if new_authors:
-        print 'Found authors not in alias file:'
+        print('Found authors not in alias file:')
         for author in new_authors:
-            print '\t', author
-    print 'update author-aliases-%s.txt to fix aliasing problems. The format is <email from git>:<value to use in output>' % repo_name
+            print('\t', author)
+    print('update author-aliases-%s.txt to fix aliasing problems. The format is <email from git>:<value to use in output>' % repo_name)
 
 
 if __name__ == '__main__':
